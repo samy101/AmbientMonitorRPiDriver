@@ -42,4 +42,3 @@ class AmbientDriver(SmapDriver):
         	return;
 
         self.add('/Temperature', time.time(), float(temperature))
-	self.counter += 1
