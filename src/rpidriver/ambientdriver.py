@@ -1,4 +1,5 @@
 import time
+import os.path
 from twisted.python import log
 
 from smap.driver import SmapDriver
@@ -6,13 +7,13 @@ from smap.util import periodicSequentialCall
 
 class AmbientDriver(SmapDriver):
     def setup(self, opts):
+	self.file_path = opts.get('path')
 	tz = opts.get('Properties/Timezone', 'Asia/Kolkata')
         self.add_timeseries('/Temperature', 'C', data_type='double', timezone=tz)
         self.rate = int(opts.get('Rate', 30))
         self.set_metadata('/', {
                 'Instrument/SamplingPeriod' : str(self.rate),
                 })
-        self.counter = int(opts.get('StartVal', 0))
 
     def start(self):
         periodicSequentialCall(self.read).start(self.rate)
@@ -20,7 +21,9 @@ class AmbientDriver(SmapDriver):
     def read(self):
         # *Code Snippet from http://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/temperature/*
         # Open the file that we viewed earlier so that python can see what is in it. Replace the serial number as before.
-        tfile = open("/sys/bus/w1/devices/28-000004a51f07/w1_slave")
+        # tfile = open("/sys/bus/w1/devices/28-000004a51f07/w1_slave")
+        tfile = open(self.file_path)
+
         # Read all of the text in the file.
         text = tfile.read()
         # Close the file now that the text has been read.
